@@ -42,8 +42,8 @@ body {
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
     -webkit-box-pack: center;
-    transition: opacity .3s ease-out;
-    transition: background-color .3s ease-out;
+    transition: opacity .3s ease-out, background-color .3s ease-out;
+    -ms-transition: opacity .3s ease-out, background-color .3s ease-out;
 }
 
 /*floatPanel样式*/
@@ -58,7 +58,6 @@ body {
     -webkit-transition: all .3s; */
     transition: opacity .5s;
     -ms-transition: opacity .5s;
-    -webkit-transition: opacity .5s;
 }
 .floatPanel.active{
     display: block;
@@ -108,7 +107,7 @@ body {
 /*panel主样式*/
 .floatPanel .panel {
     margin-bottom: 0;
-    background-color: #fff;
+    /* background-color: #fff; */
     border: 1px solid transparent;
     border-radius: 4px;
     -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
@@ -134,6 +133,7 @@ body {
     padding: 15px;
     color:#666;
     overflow:hidden;
+    background-color: #fff;
 }
 .floatPanel .panel-body::after,
 .floatPanel .panel-body::before,

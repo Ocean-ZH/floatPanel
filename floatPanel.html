@@ -58,6 +58,41 @@
             pageSize_Print();
 
         })
+        /* var a = {
+            a:'a1',
+            b:{
+                b1:'b1',
+                b2:'b2',
+            },
+            d:[1,2,3,4,5],
+            e:undefined,
+            f:null,
+            g:NaN,
+        }
+        var c = {
+            a:'ac',
+            b:{
+                b1:'cb1',
+                b3:'bc3',
+            },
+            c:'c1',
+        }
+        function deepClone(target,source){
+            if(source != null){
+                for(var key in source){
+                    if(source.hasOwnProperty(key)){
+                        if(Array.isArray(source[key])){
+                            target[key] = [];
+                        }else if(source[key] === null){
+                            target[key] = null;
+                            continue;
+                        }
+                        target[key] = typeof source[key] === 'object' ? deepClone(target[key], source[key]) : source[key];
+                    }
+                }
+                return target;
+            }
+        } */
     </script>
 </head>
 
@@ -117,7 +152,11 @@
     <script>
         var panel = null;
         var panel2 = null;
+        var  p = null;
         var count = 0;
+        function p2me(event){
+            console.log(event);
+        }
         jQuery(document).ready(function ($) {
 
             var config = {
@@ -139,15 +178,14 @@
             }
 
             //创建panel框架
-            panel = floatPanel('panel');
+            panel = FloatPanel('panel');
 
             //创建panel框架
-            panel2 = floatPanel('panel2').set({
+            panel2 = FloatPanel('panel2').set({
                 closeBtn: true,
-            }).show();
-            panel2.mouseenter(function(event){
-                    console.log(event)
-                });
+            });
+            
+            panel2.mouseenter(p2me);
             $('.show-box').on('mouseenter', function (event) {
                 // console.log(event)
                 panel.set({
@@ -158,7 +196,7 @@
                     body: {
                         content: "<div style='height:180px'>这是内容</div>"
                     },
-                    // floatHeight: 0,
+                    floatHeight: 20,
                     // spaceHeight: 10,
                 });
                 panel.show(event,function(){
@@ -171,6 +209,8 @@
             $(panel.node).on('mouseleave', function (event) {
                 panel.hide();
             })
+
+            p = FloatPanel('p').show();
         })
     </script>
 </body>
