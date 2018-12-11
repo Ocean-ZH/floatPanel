@@ -45,39 +45,47 @@
         // console.log(arguments);
         var body = document.body;
 
+        if (!id ) {
+            throw ('id required!');
+        } else if (typeof id !== 'string'){
+            throw ('invalid id!');
+        }
         // this.id = typeof id === 'string' ? id : 'floatPanel';
         Object.defineProperty(this, 'id', {
             configurable: true,
             enumerable: true,
-            value: typeof id === 'string' ? id : 'floatPanel',
+            value: id,
             writable: false,
-        })
-        //黑色背景
-        this.backDropNode = null;
+        });
         //据事件坐标浮起的高度距离
         this.floatHeight = 0;
+        //浮动高度是否参与进hide时的计算
+        this.floatHeightInvolve = false;
+        //黑色背景
+        Object.defineProperty(this, '_backDropNode', {
+            configurable: true,
+            enumerable: false,
+            value: null,
+            writable: true,
+        });
 
-        var node = document.getElementById(this.id);
+        var node = document.getElementById(id);
         if (node) {
             node.parentNode.removeChild(node);
         }
 
         var div = document.createElement('div');
         div.setAttribute('class', 'floatPanel invisible');
-        div.id = this.id;
+        div.id = id;
         body.appendChild(div);
 
-        this.node = document.getElementById(id);
-        /* Object.defineProperty(this, 'node', {
+        // this.node = document.getElementById(id);
+        Object.defineProperty(this, 'node', {
             configurable: true,
             enumerable: true,
-            get: function () {
-                return document.getElementById(this.id);
-            },
-            set: function (value) {
-                return undefined;
-            }
-        }) */
+            value: document.getElementById(id),
+            writable: false,
+        })
 
         var panelStr = '<div class="panel panel-blue">' +
             '<div class="panel-header">' +
@@ -91,8 +99,7 @@
             '<div class="panel-footer">' +
             // 'Panel footer' +
             '</div>' +
-            '</div>' +
-            '<div class="floatPanel-space"></div>';
+            '</div>';
         //'<div class="floatPanel-space"></div>';
         this.node.innerHTML = panelStr;
 
@@ -166,18 +173,6 @@
                     this.node.style['z-index'] = value;
                 },
             },
-            spaceHeight: {
-                configurable: true,
-                enumerable: true,
-                get: function () {
-                    var fs = this.node.querySelector('#' + this.id + '>.floatPanel-space');
-                    return Number(_getCss(fs, 'height'));
-                },
-                set: function (value) {
-                    var fs = this.node.querySelector('#' + this.id + '>.floatPanel-space');
-                    fs.style['height'] = value + 'px';
-                },
-            },
         });
     }
 
@@ -220,7 +215,11 @@
                 //获取框三维
                 var panelW = this.width + 10;
                 //补上定位时加的1像素
-                var panelH = this.height + 1;
+                if(this.floatHeightInvolve){
+                    var panelH = this.height + 1 + this.floatHeight;
+                }else{
+                    var panelH = this.height + 1;
+                }
                 var pageX = Number(event.pageX);
                 var pageY = Number(event.pageY);
 
@@ -231,7 +230,7 @@
                     //在框体内部,不消失
                     return 0;
                 } else {
-                    this.backDropNode ? this.backDropNode.style.display = 'none' : null;
+                    this._backDropNode ? this._backDropNode.style.display = 'none' : null;
                     // this.node.classList.add('invisible');
                     // this.node.classList.remove('active');
                     _addClass(this.node,'invisible');
@@ -241,7 +240,7 @@
                     this.node.style.display = 'none';
                 }
             } else {
-                this.backDropNode ? this.backDropNode.style.display = 'none' : null;
+                this._backDropNode ? this._backDropNode.style.display = 'none' : null;
                 _addClass(this.node, 'invisible');
                 _removeClass(this.node, 'active');
                 this.node.style.removeProperty('max-height');
@@ -340,11 +339,11 @@
                     var backDropStr = '<div class="floatPanel-backdrop" id="' + this.id + '-backDrop" style="z-index:' + (this.zIndex - 1) + ';"></div>';
                     // $(this.node).before(backDropStr);
                     this.node.insertAdjacentHTML('beforebegin', backDropStr);
-                    this.backDropNode = document.getElementById(this.id + '-backDrop');
+                    this._backDropNode = document.getElementById(this.id + '-backDrop');
                 } else if (config.backDrop === false) {
-                    if (this.backDropNode) {
-                        this.backDropNode.parentNode.removeChild(this.backDropNode);
-                        this.backDropNode = null;
+                    if (this._backDropNode) {
+                        this._backDropNode.parentNode.removeChild(this._backDropNode);
+                        this._backDropNode = null;
                     }
                 }
 
@@ -352,9 +351,9 @@
                 if (config.floatHeight) {
                     this.floatHeight = isNaN(Number(config.floatHeight)) ? this.floatHeight : Number(config.floatHeight);
                 }
-                //.floatPanel-space高度
-                if (config.spaceHeight) {
-                    this.spaceHeight = isNaN(Number(config.spaceHeight)) ? this.spaceHeight : Number(config.spaceHeight);
+                //浮动高度是否参与进hide()时的计算
+                if (config.floatHeightInvolve) {
+                    this.floatHeightInvolve = !!config.floatHeightInvolve;
                 }
                 //callback
                 /* if (config.callback && typeof config.callback === 'function') {
@@ -435,8 +434,9 @@
 
         //删除面板
         destroy: function () {
-            if (this.backDropNode) {
-                this.backDropNode.parentNode.removeChild(this.backDropNode);
+            if (this._backDropNode) {
+                this._backDropNode.parentNode.removeChild(this._backDropNode);
+                delete this._backDropNode;
             }
             this.node.parentNode.removeChild(this.node);
 
@@ -562,6 +562,6 @@
     } else {
         window.FloatPanel = FloatPanel;
     }
-
+    
 })("undefined" !== typeof window ? window : this)
 //创建框架

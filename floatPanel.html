@@ -97,7 +97,7 @@
 </head>
 
 <body>
-    <div class="outer-container" style="width: 120%; height:2000px;">
+    <div class="outer-container" style="width: 120%; height:2000px;" >
         <div id="aaa"></div>
         <div class="show-box" style="top:400px; left:0;">
             <h4 style="text-align:center; font-size:16px; margin:0;">Move your mouse here to show the float panel</h4>
@@ -178,7 +178,11 @@
             }
 
             //创建panel框架
-            panel = FloatPanel('panel');
+            panel = FloatPanel('panel').set({
+                width:500,
+                floatHeightInvolve: true,
+                floatHeight: 20,
+            });
 
             //创建panel框架
             panel2 = FloatPanel('panel2').set({
@@ -187,17 +191,14 @@
             
             panel2.mouseenter(p2me);
             $('.show-box').on('mouseenter', function (event) {
-                // console.log(event)
+                console.log(event)
                 panel.set({
-                    width:500,
                     header: {
                         content: "这是标题,count=",
                     },
                     body: {
                         content: "<div style='height:180px'>这是内容</div>"
                     },
-                    floatHeight: 20,
-                    // spaceHeight: 10,
                 });
                 panel.show(event,function(){
                     // panel.top -= 50;
@@ -210,7 +211,7 @@
                 panel.hide();
             })
 
-            p = FloatPanel('p').show();
+            p = FloatPanel('p',{backDrop:true}).show();
         })
     </script>
 </body>
