@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./misc/css/floatPanel.min.css">
+    <link rel="stylesheet" href="./misc/css/bootstrap.min.css">
+    <script src="./misc/js/jquery-3.1.1.min.js"></script>
+    <script src="./misc/js/floatPanel.js"></script>
+    <script src="./misc/js/bootstrap.min.js"></script>
+    <title>floatPanel</title>
+    <style>
+        .main-container{
+            padding-bottom: 40px;
+        }
+        .main-container ul >li{
+            list-style: none;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .panel3{
+            width: 50%;
+            height: 30px;
+            border: 1px solid #ccc;
+            background-color: #fff9e1;
+            cursor:crosshair;
+            text-align: center;
+            line-height: 30px;
+        }
+        .panel4{
+            width: 50%;
+            height: 60px;
+            border: 1px solid #ccc;
+            background-color: #fff9e1;
+            cursor:crosshair;
+            text-align: center;
+            line-height: 30px;
+        }
+    </style>
+    <script>
+        jQuery(document).ready(function($){
+            var leftArr = $('.left-section >ul >li');
+            var rightArr = $('.right-section >ul >li');
+            $.each(leftArr, function (i, el) {
+                if(rightArr[i])
+                $(rightArr[i]).height($(el).height());
+            });
+        })
+    </script>
+</head>
+<body>
+    <div class="container-fluid main-container" id="main-container">
+        <div class="row">
+            <div class="col">
+                <h1 style="text-indent:2em;">floatPanel</h1>
+            </div>
+            <div class="col col-sm-6 left-section">
+                <ul>
+                    <li>
+                        <h4>1.</h4>
+                        <pre>
+// --1--
+var panel1 = FloatPanel('panel1');
+document.querySelector('#panel1-show').addEventListener('click',function(event){
+    panel1.show({pageX:300,pageY:300});
+});
+
+// --2--
+var panel1_B = FloatPanel('panel1_B',{
+    backDrop:true,
+    body: { content:'&lt;h3&gt;panel1_backDrop&lt;/h3>&gt;'},
+});
+document.querySelector('#panel1_B-show').addEventListener('click',function(event){
+    panel1.hide();
+    panel1_B.reposition().show();
+});
+panel1_B._backDropNode.addEventListener('click',function(event){
+    panel1_B.hide();
+});
+                        </pre>
+                    </li>
+                    <li>
+                        <h4>2.</h4>
+                        <pre>
+var panel2 = FloatPanel('panel2');
+panel2.set({
+    header:{
+        content:'Panel2',
+    },
+    floatHeight: 20,
+    closeBtn:false,
+});
+document.querySelector('#panel2-show').addEventListener('click',function(event){
+    panel2.show(event);
+});
+document.querySelector('#panel2-hide').addEventListener('click',function(event){
+    panel2.hide();
+});
+                        </pre>
+                    </li>
+                    <li>
+                        <h4>3.</h4>
+                        <pre>
+var panel3 = FloatPanel('panel3').set({floatHeight:40, direction:'down'});
+$('#panel3-hover').on('mouseenter',function(event){
+    panel3.show(event);
+});
+$('#panel3-hover').on('mouseleave',function(event){
+    panel3.hide(event);
+    //在这种 鼠标离开目标即隐藏面板 的应用场景中
+    //边缘检测开启时，应在hide()中传入坐标对象
+    //避免因为面板被屏幕边缘挤回，覆盖#panel3-hover时产生的错误的事件触发
+});
+panel3.mouseleave(function(event){this.hide()});
+                        </pre>
+                    </li>
+                    <li>
+                        <h4>4.</h4>
+                        <pre>
+var panel4 = FloatPanel('panel4').set({floatHeight:40,});
+$('#panel4-hover').on('mouseenter',function(event){
+    panel4.show(event);
+});
+$('#panel4-hover').on('mousemove',function(event){
+    panel4.reposition(event);
+});
+$('#panel4-hover').on('mouseleave',function(event){
+    panel4.hide(event);
+});
+                        </pre>
+                    </li>
+                </ul>
+            </div>
+            <div class="col col-sm-6 right-section">
+                <ul>
+                    <li>
+                        <h4>1.</h4>
+                        <p>
+                            点击在(300,300)处显示
+                        </p>
+                        <button id="panel1-show">panel1-show</button>
+                        <br />
+                        <br />
+                        <p>
+                            点击显示于屏幕中央, 带背景, 背景点击隐藏
+                        </p>
+                        <button id="panel1_B-show">panel1_B-show</button>
+                    </li>
+                    <li>
+                        <h4>2.</h4>
+                        <p>
+                            点击显示于按钮处
+                        </p>
+                        <button id="panel2-show">panel2-show</button>
+                        <br />
+                        <br />
+                        <p>
+                            点击隐藏
+                        </p>
+                        <button id="panel2-hide">panel2-hide</button>
+                    </li>
+                    <li>
+                        <h4>3.</h4>
+                        <p>
+                            鼠标移入向下显示，移出隐藏
+                        </p>
+                        <div class="panel3" id="panel3-hover">panel3-hover</div>
+                    </li>
+                    <li>
+                        <h4>4.</h4>
+                        <p>
+                            鼠标移入显示，移出隐藏，面板跟随鼠标
+                        </p>
+                        <div class="panel4" id="panel4-hover">panel4-hover</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --1--
+        var panel1 = FloatPanel('panel1');
+        document.querySelector('#panel1-show').addEventListener('click',function(event){
+            panel1.show({pageX:300,pageY:300});
+        });
+
+        // --2--
+        var panel1_B = FloatPanel('panel1_B',{
+            backDrop:true,
+            body: {
+                content:'<h3>panel1_B</h3>',
+            },
+        });
+        document.querySelector('#panel1_B-show').addEventListener('click',function(event){
+            panel1.hide();
+            panel1_B.reposition().show();
+        });
+        panel1_B._backDropNode.addEventListener('click',function(event){
+            panel1_B.hide();
+        });
+    </script>
+    <script>
+        var panel2 = FloatPanel('panel2');
+        panel2.set({
+            header:{
+                content:'Panel2',
+            },
+            floatHeight: 20,
+            closeBtn:false,
+        });
+        document.querySelector('#panel2-show').addEventListener('click',function(event){
+            panel2.show(event);
+        });
+        document.querySelector('#panel2-hide').addEventListener('click',function(event){
+            panel2.hide();
+        });
+    </script>
+    <script>
+        var panel3 = FloatPanel('panel3').set({floatHeight:40, direction:'down'});
+        $('#panel3-hover').on('mouseenter',function(event){
+            panel3.show(event);
+        });
+        $('#panel3-hover').on('mouseleave',function(event){
+            panel3.hide(event);
+            //在这种 鼠标离开目标即隐藏面板 的应用场景中
+            //边缘检测开启时，应在hide()中传入坐标对象
+            //避免因为面板被屏幕边缘挤回，覆盖#panel3-hover时产生的错误的事件触发
+        });
+        panel3.mouseleave(function(event){panel3.hide()});
+    </script>
+    <script>
+        var panel4 = FloatPanel('panel4').set({floatHeight:40,});
+        $('#panel4-hover').on('mouseenter',function(event){
+            panel4.show(event);
+        });
+        $('#panel4-hover').on('mousemove',function(event){
+            panel4.reposition(event);
+        });
+        $('#panel4-hover').on('mouseleave',function(event){
+            panel4.hide(event);
+        });
+        panel4.mouseleave(function(event){panel4.hide()});
+    </script>
+</body>
+</html>

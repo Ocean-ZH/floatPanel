@@ -1,41 +1,40 @@
-'use strict'
 
-    //----------**********----------**********
-
-    ;
-(function (global) {
+;(function (global) {
+    'use strict'
     var window = global;
     var document = window.document;
     //储存着生成的对象
     var panelData = {};
-    //默认配置
-    var defaultConfig = {
-        width : 300,
-        height : 'auto',
-        header: {
-            enabled: true,
-            content: 'Panel title',
-        },
-        footer: {
-            enabled: true,
-            content: 'Panel footer',
-        },
-        body: {
-            enabled: true,
-            content: 'Panel content',
-        },
-        closeBtn: true,
-        backDrop: false,
-        floatHeight: 0,
-        spaceHeight: 0,
-    };
 
     function FloatPanel(id, customConfig) {
+        //默认配置
+        var defaultConfig = {
+            width: 300,
+            height: 'auto',
+            header: {
+                enabled: true,
+                content: 'Panel title',
+            },
+            footer: {
+                enabled: true,
+                content: 'Panel footer',
+            },
+            body: {
+                enabled: true,
+                content: 'Panel content',
+            },
+            closeBtn: true,
+            backDrop: false,
+            floatHeight: 10,
+            floatHeightInvolve: false,
+        };
+        
         panelData[id] = new Create_floatPanel(id);
         var config = defaultConfig;
         if (customConfig){
             config = _deepClone(defaultConfig, customConfig);
         }
+        // console.log(config)
         panelData[id].set(config);
         panelData[id].reposition();
         return panelData[id];
@@ -61,6 +60,10 @@
         this.floatHeight = 0;
         //浮动高度是否参与进hide时的计算
         this.floatHeightInvolve = false;
+        //弹出的方向
+        this.direction = 'up';
+        //屏幕边缘检测
+        this.edgeDetection = true;
         //黑色背景
         Object.defineProperty(this, '_backDropNode', {
             configurable: true,
@@ -110,13 +113,14 @@
                 enumerable: true,
                 get: function () {
                     return _getCss(this.node, 'width');
-                    // return $(this.node).width();
                 },
                 set: function (value) {
                     if (typeof value === 'number') {
-                        this.node.querySelector('#' + this.id + ' > .panel').style.width = value + 'px';
+                        this.node.style.width = value + 'px';
+                        // this.node.querySelector('#' + this.id + ' > .panel').style.width = value + 'px';
                     } else {
-                        this.node.querySelector('#' + this.id + ' > .panel').style.width = value;
+                        this.node.style.width = value;
+                        // this.node.querySelector('#' + this.id + ' > .panel').style.width = value;
                     }
                 },
             },
@@ -128,9 +132,9 @@
                 },
                 set: function (value) {
                     if(typeof value === 'number'){
-                        this.node.querySelector('#' + this.id + ' > .panel').style.height = value + 'px';
+                        this.node.style.height = value + 'px';
                     }else{
-                        this.node.querySelector('#' + this.id + ' > .panel').style.height = value;
+                        this.node.style.height = value;
                     }
                 },
             },
@@ -171,6 +175,9 @@
                 },
                 set: function (value) {
                     this.node.style['z-index'] = value;
+                    if (this._backDropNode) {
+                        this._backDropNode.style['z-index'] = Number(value) - 1;
+                    }
                 },
             },
         });
@@ -182,6 +189,7 @@
         show: function (event, callback) {
             var arg = arguments;
             // console.log(arg);
+            var html = document.querySelector('html');
 
             for (var i = 0; i < arg.length; i++) {
                 if (typeof arg[i] == 'object') {
@@ -194,11 +202,12 @@
                     arg[i].call(this);
                 }
             }
-
-            // typeof callback == 'function' ? callback.call(this) : null;
-
             // IE9兼容问题
             // this.node.classList.add('active');
+            if (this._backDropNode){
+                this._backDropNode.style.display = 'block';
+                document.querySelector('html').style.overflow = 'hidden';
+            }
             _addClass(this.node, 'active');
             this.node.style.display = 'block';
             // this.node.classList.remove('invisible');
@@ -214,23 +223,30 @@
 
                 //获取框三维
                 var panelW = this.width + 10;
-                //补上定位时加的1像素
-                if(this.floatHeightInvolve){
-                    var panelH = this.height + 1 + this.floatHeight;
-                }else{
-                    var panelH = this.height + 1;
-                }
+                var panelH = this.height + 1;
                 var pageX = Number(event.pageX);
                 var pageY = Number(event.pageY);
-
+                var top = this.top;
+                if(this.floatHeightInvolve == true){
+                    //补上定位时加的1像素
+                    var panelH = this.height + 1 + this.floatHeight;
+                    //判断弹出方向
+                    if (this.direction && this.direction.toLowerCase() === 'down') {
+                        top -= this.floatHeight;
+                    }
+                }
                 // console.log('pageY=' + pageY)
                 // console.log('top=' + this.top + ' panelH=' + panelH + ' total=' + (this.top + panelH))
 
-                if (pageX >= this.left && pageX <= this.left + panelW && pageY >= this.top && pageY <= this.top + panelH) {
+                
+                if (pageX >= this.left && pageX <= this.left + panelW && pageY >= top && pageY <= top + panelH) {
                     //在框体内部,不消失
                     return 0;
                 } else {
-                    this._backDropNode ? this._backDropNode.style.display = 'none' : null;
+                    if (this._backDropNode) {
+                        this._backDropNode.style.display = 'none';
+                        document.querySelector('html').style.overflow = '';
+                    }
                     // this.node.classList.add('invisible');
                     // this.node.classList.remove('active');
                     _addClass(this.node,'invisible');
@@ -240,7 +256,11 @@
                     this.node.style.display = 'none';
                 }
             } else {
-                this._backDropNode ? this._backDropNode.style.display = 'none' : null;
+                //this._backDropNode ? this._backDropNode.style.display = 'none' : null;
+                if (this._backDropNode) {
+                    this._backDropNode.style.display = 'none';
+                    document.querySelector('html').style.overflow = '';
+                }
                 _addClass(this.node, 'invisible');
                 _removeClass(this.node, 'active');
                 this.node.style.removeProperty('max-height');
@@ -336,7 +356,7 @@
                     if (backDrop) {
                         backDrop.parentNode.removeChild(backDrop);
                     }
-                    var backDropStr = '<div class="floatPanel-backdrop" id="' + this.id + '-backDrop" style="z-index:' + (this.zIndex - 1) + ';"></div>';
+                    var backDropStr = '<div class="floatPanel-backdrop" id="' + this.id + '-backDrop" style="z-index:' + (this.zIndex - 1) + '; display:none;"></div>';
                     // $(this.node).before(backDropStr);
                     this.node.insertAdjacentHTML('beforebegin', backDropStr);
                     this._backDropNode = document.getElementById(this.id + '-backDrop');
@@ -346,7 +366,14 @@
                         this._backDropNode = null;
                     }
                 }
-
+                //弹出方向
+                if (config.direction) {
+                    config.direction.toLowerCase() === 'down'? this.direction='down' : this.direction='up';
+                }
+                //边缘检测
+                if (config.edgeDetection) {
+                    config.edgeDetection == false ? this.edgeDetection = false : this.edgeDetection = true;
+                }
                 //浮动高度
                 if (config.floatHeight) {
                     this.floatHeight = isNaN(Number(config.floatHeight)) ? this.floatHeight : Number(config.floatHeight);
@@ -364,7 +391,7 @@
             return this;
         },
 
-        //框架大小和位置调整
+        //框架位置调整
         reposition: function (event) {
             //获取屏幕文档宽高
             var winW = document.documentElement.clientWidth;
@@ -372,17 +399,21 @@
             //获取ScrollTop
             var ST = document.documentElement.scrollTop;
             var SL = document.documentElement.scrollLeft;
-            //console.log(ST + ' , ' + SL);
 
             //获取框三维
             var panelW = this.width;
-            var panelH = this.height + 1 + this.floatHeight;
+            var panelH = this.height + 1;
 
             // 如果没有event或event内无pageX,pageY,默认显示在屏幕中间
             if (!event || !event.pageX || !event.pageY) {
                 var event = {};
                 event.pageX = (winW / 2) + SL;
-                event.pageY = (winH / 2) + ST + ( panelH / 2 );
+                //判断弹出方向
+                if (this.direction && this.direction.toLowerCase() === 'down'){
+                    event.pageY = (winH / 2) + ST - (panelH / 2) - this.floatHeight;
+                }else{
+                    event.pageY = (winH / 2) + ST + (panelH / 2) + this.floatHeight;
+                }
             }
             // console.log("coordinate = (" + event.pageX + "," + event.pageY + ")");
             // console.log("scrollLeftTOP = (" + SL + "," + ST + ")");
@@ -391,40 +422,51 @@
             //实际的left,减去一半框架
             pageX = pageX - panelW / 2;
             var pageY = Number(event.pageY);
-            //实际的top,减去整个框架
-            pageY = pageY - panelH;
-
-            //屏幕边缘检测
-            //框架宽度和X轴定位
-            if (panelW > winW) { //框宽>屏幕宽
-                this.node.style.left = (5 + SL) + 'px';
-                this.node.style['max-width'] = (winW - 10) + 'px';
-                this.node.style['overflow-x'] = 'auto';
-            } else { //框宽<屏幕宽
-                if ((pageX + panelW) < (winW + SL)) { //框宽+事件left<屏幕宽+scrollLeft
-                    if (pageX < SL) { //事件left<scrollLeft
-                        this.node.style.left = (5 + SL) + 'px';
-                    } else { //事件left>scrollLeft
-                        this.node.style.left = pageX + 'px';
-                    }
-                } else { //框宽+事件left>屏幕宽+scrollLeft
-                    this.node.style.left = (pageX - (pageX + panelW - winW - SL)) + 'px';
-                }
+            //判断弹出方向
+            if (this.direction && this.direction.toLowerCase() === 'down'){
+                //实际的top, 加上floatHeight
+                pageY = pageY + this.floatHeight;
+            }else{
+                //实际的top,减去整个框架
+                pageY = pageY - panelH - this.floatHeight;
             }
 
-            //框架高度和Y轴定位
-            if (this.height > winH) { //框高>屏幕底高
-                this.node.style.top = (5 + ST) + 'px';
-                this.node.style['max-height'] = (winH - 10) + 'px';
-                this.node.style['overflow-y'] = 'auto';
-            } else { //框高<屏幕底高
-                if (pageY < ST) { //事件top<屏幕顶高
+            if (this.edgeDetection == false) {
+                this.node.style.left = pageX + 'px';
+                this.node.style.top = pageY + 'px';
+            }else{
+                //屏幕边缘检测
+                //框架宽度和X轴定位
+                if (panelW > winW) { //框宽>屏幕宽
+                    this.node.style.left = (5 + SL) + 'px';
+                    this.node.style['max-width'] = (winW - 10) + 'px';
+                    this.node.style['overflow-x'] = 'auto';
+                } else { //框宽<屏幕宽
+                    if ((pageX + panelW) < (winW + SL)) { //框宽+事件left<屏幕宽+scrollLeft
+                        if (pageX < SL) { //事件left<scrollLeft
+                            this.node.style.left = (5 + SL) + 'px';
+                        } else { //事件left>scrollLeft
+                            this.node.style.left = pageX + 'px';
+                        }
+                    } else { //框宽+事件left>屏幕宽+scrollLeft
+                        this.node.style.left = (pageX - (pageX + panelW - winW - SL)) + 'px';
+                    }
+                }
+
+                //框架高度和Y轴定位
+                if (this.height > winH) { //框高>屏幕底高
                     this.node.style.top = (5 + ST) + 'px';
-                } else { //事件top>屏幕顶高
-                    if (panelH + pageY - ST < winH) { //框高加上事件top<屏幕底高
-                        this.node.style.top = pageY + 'px';
-                    } else { //框高加上事件top>屏幕底高
-                        this.node.style.top = (pageY - (pageY - ST + panelH - winH)) + 'px';
+                    this.node.style['max-height'] = (winH - 10) + 'px';
+                    this.node.style['overflow-y'] = 'auto';
+                } else { //框高<屏幕底高
+                    if (pageY < ST) { //事件top<屏幕顶高
+                        this.node.style.top = (5 + ST) + 'px';
+                    } else { //事件top>屏幕顶高
+                        if (panelH + pageY - ST < winH) { //框高加上事件top<屏幕底高
+                            this.node.style.top = pageY + 'px';
+                        } else { //框高加上事件top>屏幕底高
+                            this.node.style.top = (pageY - (pageY - ST + panelH - winH)) + 'px';
+                        }
                     }
                 }
             }
@@ -494,10 +536,11 @@
     function _getCss_func1(node, type, callback) {
         // var a = 2;
         var result = null;
-        if (node.style[type]) {
+        /* if (node.style[type]) {
             result = node.style[type];
             return result;
-        } else {
+        } else */
+        {
             // IE9兼容问题
             // node.style.setProperty('visibility', 'hidden');
             node.style['visibility']= 'hidden';
@@ -533,7 +576,7 @@
             element.className = element.className.replace(new RegExp("(\\s|^)" + yourClassName + "(\\s|$)"), " ");
         };
     };
-    //对象递归深拷贝, 对象值限制为基本数据类型
+    //对象递归深拷贝, 对象属性值限制为基本数据类型或数组
     function _deepClone(target,source){
         if(source != null){
             for(var key in source){
@@ -549,7 +592,7 @@
                     }else{
                         target[key] = source[key];
                     } */
-                    target[key] = typeof source[key] === 'object' ? deepClone(target[key], source[key]) : source[key];
+                    target[key] = typeof source[key] === 'object' ? _deepClone(target[key], source[key]) : source[key];
                 }
             }
             return target;

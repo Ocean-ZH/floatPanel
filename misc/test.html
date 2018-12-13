@@ -36,6 +36,19 @@
             cursor: pointer;
             position: absolute;
         }
+        .btn-box {
+            border: 1px solid #000;
+            display: inline-block;
+            padding: 5px;
+            cursor: pointer;
+            position: absolute;
+            top: 50px;
+            left: 20px;
+        }
+        .btn-box button{
+            padding: 5px 10px;
+            cursor: pointer;
+        }
     </style>
     <script>
         //获取页面视区宽高
@@ -68,6 +81,7 @@
             e:undefined,
             f:null,
             g:NaN,
+            h:false,
         }
         var c = {
             a:'ac',
@@ -98,7 +112,10 @@
 
 <body>
     <div class="outer-container" style="width: 120%; height:2000px;" >
-        <div id="aaa"></div>
+        <div class="btn-box">
+            <button id="show">show</button>
+            <button id="hide">hide</button>
+        </div>
         <div class="show-box" style="top:400px; left:0;">
             <h4 style="text-align:center; font-size:16px; margin:0;">Move your mouse here to show the float panel</h4>
         </div>
@@ -147,6 +164,8 @@
     <script>
         jQuery(document).ready(function ($) {
             $('.outer-container').css({'min-height':document.documentElement.clientHeight,});
+            $('#show').on('click',function(event){panel2.show();});
+            $('#hide').on('click',function(event){panel2.hide();});
         })
     </script>
     <script>
@@ -154,6 +173,7 @@
         var panel2 = null;
         var  p = null;
         var count = 0;
+
         function p2me(event){
             console.log(event);
         }
@@ -179,25 +199,19 @@
 
             //创建panel框架
             panel = FloatPanel('panel').set({
+                header: {
+                    content: "这是标题",
+                },
                 width:500,
                 floatHeightInvolve: true,
                 floatHeight: 20,
+                direction:'down',
             });
-
-            //创建panel框架
-            panel2 = FloatPanel('panel2').set({
-                closeBtn: true,
-            });
-            
-            panel2.mouseenter(p2me);
             $('.show-box').on('mouseenter', function (event) {
                 console.log(event)
                 panel.set({
-                    header: {
-                        content: "这是标题,count=",
-                    },
                     body: {
-                        content: "<div style='height:180px'>这是内容</div>"
+                        content: "<div style='height:180px'>"+ (count++) +"</div>"
                     },
                 });
                 panel.show(event,function(){
@@ -211,7 +225,14 @@
                 panel.hide();
             })
 
-            p = FloatPanel('p',{backDrop:true}).show();
+            //创建panel框架
+            panel2 = FloatPanel('panel2').set({
+                closeBtn: true,
+            }).show();
+
+            // panel2.mouseenter(p2me);
+
+            // p = FloatPanel('p').show();
         })
     </script>
 </body>
