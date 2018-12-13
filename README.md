@@ -1,6 +1,5 @@
 # floatPanel简介
 floatPanel.js是一个javascript网页浮动框生成工具
-面板会检测屏幕边缘
 
 # 安装
 [floatPanel.zip](https://github.com/Ocean-ZH/floatPanel/releases/download/1.0.0/floatPanel.zip)
