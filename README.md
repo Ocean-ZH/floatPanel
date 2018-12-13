@@ -3,7 +3,7 @@ floatPanel.js是一个javascript网页浮动框生成工具
 面板会检测屏幕边缘
 
 # 安装
-[floatPanel.zip]()
+[floatPanel.zip](https://github.com/Ocean-ZH/floatPanel/releases/download/1.0.0/floatPanel.zip)
 - 引入css
 ```javascript
 <link href="css/floatPanel.css" rel="stylesheet" type="text/css"/>
@@ -13,6 +13,10 @@ floatPanel.js是一个javascript网页浮动框生成工具
 ```javascript
 <script src="js/floatPanel.js" ></script>
 ```
+
+# Demo
+    点下方链接查看Demo
+    [Demo](https://ocean-zh.github.io/floatPanel/index.html)
 
 # 使用
 ## 初始化
