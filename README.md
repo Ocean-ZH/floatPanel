@@ -15,8 +15,8 @@ floatPanel.js是一个javascript网页浮动框生成工具
 ```
 
 # Demo
-    点下方链接查看Demo
-    [Demo](https://ocean-zh.github.io/floatPanel/index.html)
+点下方链接查看Demo
+[Demo](https://ocean-zh.github.io/floatPanel/index.html)
 
 # 使用
 ## 初始化
