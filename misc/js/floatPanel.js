@@ -397,8 +397,8 @@
             var winW = document.documentElement.clientWidth;
             var winH = document.documentElement.clientHeight;
             //获取ScrollTop
-            var ST = document.documentElement.scrollTop;
-            var SL = document.documentElement.scrollLeft;
+            var ST = _scrollGet().scrollTop;
+            var SL = _scrollGet().scrollLeft;
 
             //获取框三维
             var panelW = this.width;
@@ -597,6 +597,15 @@
             }
             return target;
         }
+    }
+    //获取scrollTop和scrollLeft的兼容方案
+    function _scrollGet(){
+        var supportPageOffset = window.pageXOffset !== undefined;
+        var isCSS1Compat = ((document.compatMode || "") === "CSS1Compat");
+
+        var x = supportPageOffset ? window.pageXOffset : isCSS1Compat ? document.documentElement.scrollLeft : document.body.scrollLeft;
+        var y = supportPageOffset ? window.pageYOffset : isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
+        return {scrollTop:y,scrollLeft:x,}
     }
 
     //向window或者加载器暴露方法
